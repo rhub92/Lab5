@@ -52,14 +52,14 @@ unsigned char movePlayer(unsigned char player, unsigned char direction)
 
 unsigned char buttonMove() {
 	while ((BIT1 & P1IN) && (BIT2 & P1IN) && (BIT3 & P1IN)) {
-	if(BIT1 & ~P1IN) {
-		return 1;
-	}
+		if (BIT1 & ~P1IN) {
+			return 1;
+		}
 
-	if(BIT2 & ~P1IN) {
-		return 2;
+		if (BIT2 & ~P1IN) {
+			return 2;
+		}
 	}
-}
 }
 
 
