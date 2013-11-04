@@ -17,6 +17,7 @@ void main(void) {
 
 		while (player != 0xc7) {
 			unsigned char buttonPress = buttonMove();
+			clearPlayer(player);
 			player = movePlayer(player, buttonPress);
 			printPlayer(player);
 		}
@@ -29,12 +30,12 @@ void main(void) {
 		player = initPlayer();
 		printPlayer(player);
 	}
-	while (1) {
-	};
+	//while (1) {
+	//};
 
 }
 
-
+/*
 void timer() {
 	TACTL &= ~(MC1|MC0);        // stop timer
 
@@ -63,4 +64,7 @@ void timer() {
 	    TACTL |= TAIE;              // enable interrupt
 
 	    __enable_interrupt();       // enable maskable interrupts
+
+
 }
+*/

@@ -21,9 +21,9 @@ void clearPlayer(unsigned char player)
 
 unsigned char movePlayer(unsigned char player, unsigned char direction)
 {
-	clearPlayer(player);
+	//clearPlayer(player);
 	switch (direction) {
-	case 1:
+	case RIGHT:
 		if (player == 0x87) {
 			player = 0xc0;
 		} else {
@@ -31,13 +31,29 @@ unsigned char movePlayer(unsigned char player, unsigned char direction)
 		}
 		break;
 
-	case 2:
+	case LEFT:
 		if (player == 0x80) {
 			player = player;
 		} else if (player == 0xc0) {
 			player = 0x87;
 		} else {
 		player = player - 1;
+		}
+		break;
+
+	case UP:
+		if (player <= 0x87) {
+			player = player;
+		} else {
+			player = player - 0x40;
+		}
+		break;
+
+	case DOWN:
+		if(player >= 0xc0) {
+			player = player;
+		} else {
+			player = player + 0x40;
 		}
 		break;
 	}
@@ -51,13 +67,21 @@ unsigned char movePlayer(unsigned char player, unsigned char direction)
 //}
 
 unsigned char buttonMove() {
-	while ((BIT1 & P1IN) && (BIT2 & P1IN) && (BIT3 & P1IN)) {
+	while ((BIT1 & P1IN) && (BIT2 & P1IN) && (BIT3 & P1IN) && (BIT4 & P1IN)) {
 		if (BIT1 & ~P1IN) {
-			return 1;
+			return RIGHT;
 		}
 
 		if (BIT2 & ~P1IN) {
-			return 2;
+			return LEFT;
+		}
+
+		if (BIT3 & ~P1IN) {
+			return UP;
+		}
+
+		if (BIT4 & ~P1IN) {
+			return DOWN;
 		}
 	}
 }
