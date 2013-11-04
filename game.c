@@ -34,6 +34,8 @@ unsigned char movePlayer(unsigned char player, unsigned char direction)
 	case 2:
 		if (player == 0x80) {
 			player = player;
+		} else if (player == 0xc0) {
+			player = 0x87;
 		} else {
 		player = player - 1;
 		}
@@ -50,11 +52,11 @@ unsigned char movePlayer(unsigned char player, unsigned char direction)
 
 unsigned char buttonMove() {
 	while ((BIT1 & P1IN) && (BIT2 & P1IN) && (BIT3 & P1IN)) {
-	if(BIT1 & P1IN) {
+	if(BIT1 & ~P1IN) {
 		return 1;
 	}
 
-	if(BIT2 & P1IN) {
+	if(BIT2 & ~P1IN) {
 		return 2;
 	}
 }
