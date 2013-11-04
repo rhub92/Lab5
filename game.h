@@ -40,6 +40,8 @@ unsigned char movePlayer(unsigned char player, unsigned char direction);
 //
 char didPlayerWin(unsigned char player);
 
+unsigned char buttonMove();
+
 /*
  * Functions which may prove useful in achieving A-Functionality.
  *
