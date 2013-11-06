@@ -106,6 +106,30 @@ void timer() {
 	    __enable_interrupt();       // enable maskable interrupts
 
 }
+
+void testAndRespondToButtonPush(char buttonToTest)
+{
+    if (buttonToTest & P1IFG)
+    {
+        if (buttonToTest & P1IES)
+        {
+        	buttonToTest = buttonMove();
+        	clearPlayer(player);
+        	player = movePlayer(player, buttonToTest);
+        	printPlayer(player);
+        	//movePlayerInResponseToButtonPush(buttonToTest);
+			TACTL |= TACLR;
+			flag = 0;
+        } else
+        {
+            debounce();
+        }
+
+        P1IES ^= buttonToTest;
+        P1IFG &= ~buttonToTest;
+    }
+}
+
 #pragma vector=TIMER0_A1_VECTOR
 __interrupt void TIMER0_A1_ISR()
 {
@@ -117,3 +141,19 @@ __interrupt void TIMER0_A1_ISR()
 		mines[1] = mines[1] - 1;
 	}
 }
+#pragma vector = PORT2_VECTOR
+__interrupt void Port_2_ISR(){
+	if(game != 0) {
+        testAndRespondToButtonPush(BIT1);
+        testAndRespondToButtonPush(BIT2);
+        testAndRespondToButtonPush(BIT3);
+        testAndRespondToButtonPush(BIT4);
+	}
+
+
+
+}
+
+
+
+
