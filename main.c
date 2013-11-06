@@ -3,71 +3,81 @@
 void timer();
 
 unsigned char game;
-char buttons[] = {BIT1, BIT2, BIT3, BIT4};
+char buttons[] = { BIT1, BIT2, BIT3, BIT4 };
 char flag = 0;
 unsigned char player;
 unsigned char mines[NUM_MINES];
+char button;
 void main(void) {
-    WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
-    initSPI();
-    lcdInitialize();
-    lcdClear();
+	WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
+	initSPI();
+	lcdInitialize();
+	lcdClear();
 
-    timer();
-    //int seed = rand();
-    //buttonInitialize();
+	timer();
 	configureP1PinAsButton(BIT1 | BIT2 | BIT3 | BIT4);
 	_enable_interrupt();
+	unsigned int seed = rand();
+	unsigned int random = prand(seed);
 	while (1) {
 
-		int seed = rand();
-			mines[0] = 0x80;
-			mines[1] = 0xc0;
+		mines[0] = 0x80;
+		mines[1] = 0xc0;
 
-			while(mines[1] - mines[0] == 0x40 || mines[1] - mines[0] == 0x41 || mines[1] - mines[0] == 0x39){
-				int random = prand(seed);
-				int random1 = prand(random);
-				mines[0] = 0x81 + random%7;
-				mines[1] = 0xc0 + random1%7;
-				printMines(mines);
-			}
-
+		while (mines[1] - mines[0] == 0x40 || mines[1] - mines[0] == 0x41
+				|| mines[1] - mines[0] == 0x3f) {
+			random = prand(random);
+			mines[0] = 0x81 + random % 7;
+			random = prand(random);
+			mines[1] = 0xc0 + random % 7;
+		}
+		printMines(mines);
 
 		player = initPlayer();
 		//could also include in while if some value is 1 and when you lose the value is set to zero
 
 		game = 1;
 		//while (game != 0) {
-			while (player != 0xc7 && game != 0 && player != mines[0] && player != mines[1]) {
+		while (player != 0xc7 && game != 0 && player != mines[0]
+				&& player != mines[1]) {
+			unsigned char buttonPress = 0;
 			//generateMines(mines);
 			printPlayer(player);
-			unsigned char buttonPress = buttonMove();
+			buttonPress = buttonMove();
 			//if button pressed than do all this
+			//pollRelease(buttons, 4);
 			clearPlayer(player);
 			player = movePlayer(player, buttonPress);
 			printPlayer(player);
-			TACTL |= TACLR;
-			flag = 0;
+			if (buttonPress != 0) {
+				TACTL |= TACLR;
+				flag = 0;
+				pollRelease(buttons, 4);
+			}
 		}
 		if (player == 0xc7) {
 			lcdClear();
 			displayScreen("You     ");
 			goToBottomLine();
 			displayScreen("Won!    ");
-			pollP1Buttons(buttons, 4);
+			button = pollP1Buttons(buttons, 4);
+			while (!(button & P1IN)) {}
+			debounce();
 			lcdClear();
 			TACTL |= TACLR;
 			flag = 0;
-			player = initPlayer();
+			//player = initPlayer();
 			//printPlayer(player);
 		} else if(game == 0) {
 			lcdClear();
 			displayScreen("You     ");
 			goToBottomLine();
 			displayScreen("Lose!   ");
-			pollP1Buttons(buttons, 4);
+			button = pollP1Buttons(buttons, 4);
+			while (!(button & P1IN)) {}
+			debounce();
 			lcdClear();
-			player = initPlayer();
+			//player = initPlayer();
 			TACTL |= TACLR;
 			flag = 0;
 			//printPlayer(player);
@@ -77,9 +87,11 @@ void main(void) {
 			displayScreen("BOOOOOOM");
 			goToBottomLine();
 			displayScreen("YOU DEAD");
-			pollP1Buttons(buttons, 4);
+			button = pollP1Buttons(buttons, 4);
+			while (!(button & P1IN)) {}
+			debounce();
 			lcdClear();
-			player = initPlayer();
+			//player = initPlayer();
 			TACTL |= TACLR;
 			flag = 0;
 		}
@@ -139,6 +151,7 @@ __interrupt void TIMER0_A1_ISR()
 		game = 0;
 		//mines[0] = mines[0] - 1;
 		//mines[1] = mines[1] - 1;
+		//printMines(mines);
 	}
 }
 #pragma vector = PORT2_VECTOR

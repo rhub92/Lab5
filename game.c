@@ -3,7 +3,6 @@
 #include "lcd.h"
 
 
-
 unsigned char initPlayer()
 {
 	return 0x80;
@@ -70,7 +69,7 @@ unsigned char movePlayer(unsigned char player, unsigned char direction)
 
 unsigned char buttonMove() {
 
-	char button;
+	char button = 0;
 
 	//while ((BIT1 & P1IN) && (BIT2 & P1IN) && (BIT3 & P1IN) && (BIT4 & P1IN)) {
 	if (isP1ButtonPressed(BIT1)) {
@@ -94,7 +93,6 @@ unsigned char buttonMove() {
 	}
 	//}
 
-
 	return button;
 }
 
@@ -111,6 +109,7 @@ void generateMines(unsigned char mines[NUM_MINES]) {
 		mines[1] = 0xc0 + random1%7;
 		printMines(mines);
 	}
+
 }
 
 void printMines(unsigned char mines[NUM_MINES]) {
