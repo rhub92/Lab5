@@ -2,45 +2,90 @@
 #include "game.h"
 void timer();
 
-
+unsigned char game;
+char buttons[] = {BIT1, BIT2, BIT3, BIT4};
 char flag = 0;
 unsigned char player;
+unsigned char mines[NUM_MINES];
 void main(void) {
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
     initSPI();
     lcdInitialize();
     lcdClear();
 
-
     timer();
-	buttonInitialize();
+    //int seed = rand();
+    //buttonInitialize();
+	configureP1PinAsButton(BIT1 | BIT2 | BIT3 | BIT4);
 	_enable_interrupt();
 	while (1) {
-		player = initPlayer();
-		printPlayer(player);
 
+		int seed = rand();
+			mines[0] = 0x80;
+			mines[1] = 0xc0;
+
+			while(mines[1] - mines[0] == 0x40 || mines[1] - mines[0] == 0x41 || mines[1] - mines[0] == 0x39){
+				int random = prand(seed);
+				int random1 = prand(random);
+				mines[0] = 0x81 + random%7;
+				mines[1] = 0xc0 + random1%7;
+				printMines(mines);
+			}
+
+
+		player = initPlayer();
 		//could also include in while if some value is 1 and when you lose the value is set to zero
-		while (player != 0xc7) {
+
+		game = 1;
+		//while (game != 0) {
+			while (player != 0xc7 && game != 0 && player != mines[0] && player != mines[1]) {
+			//generateMines(mines);
+			printPlayer(player);
 			unsigned char buttonPress = buttonMove();
+			//if button pressed than do all this
 			clearPlayer(player);
 			player = movePlayer(player, buttonPress);
 			printPlayer(player);
 			TACTL |= TACLR;
 			flag = 0;
 		}
-		lcdClear();
-		displayScreen("You     ");
-		goToBottomLine();
-		displayScreen("Won!    ");
-		buttonMove();
-		lcdClear();
-		player = initPlayer();
-		printPlayer(player);
+		if (player == 0xc7) {
+			lcdClear();
+			displayScreen("You     ");
+			goToBottomLine();
+			displayScreen("Won!    ");
+			pollP1Buttons(buttons, 4);
+			lcdClear();
+			TACTL |= TACLR;
+			flag = 0;
+			player = initPlayer();
+			//printPlayer(player);
+		} else if(game == 0) {
+			lcdClear();
+			displayScreen("You     ");
+			goToBottomLine();
+			displayScreen("Lose!   ");
+			pollP1Buttons(buttons, 4);
+			lcdClear();
+			player = initPlayer();
+			TACTL |= TACLR;
+			flag = 0;
+			//printPlayer(player);
+			//generateMines(mines);
+		} else if (player == mines[0] || player == mines[1]) {
+			lcdClear();
+			displayScreen("BOOOOOOM");
+			goToBottomLine();
+			displayScreen("YOU DEAD");
+			pollP1Buttons(buttons, 4);
+			lcdClear();
+			player = initPlayer();
+			TACTL |= TACLR;
+			flag = 0;
+		}
 	}
-	//while (1) {
-	//};
-
 }
+
 
 
 void timer() {
@@ -67,13 +112,8 @@ __interrupt void TIMER0_A1_ISR()
     TACTL &= ~TAIFG;            // clear interrupt flag
     flag += 1;
 	if (flag == 4) {
-		lcdClear();
-		displayScreen("You     ");
-		goToBottomLine();
-		displayScreen("Lose!   ");
-		buttonMove();
-		lcdClear();
-		player = initPlayer();
-		printPlayer(player);
-    }
+		game = 0;
+		mines[0] = mines[0] - 1;
+		mines[1] = mines[1] - 1;
+	}
 }

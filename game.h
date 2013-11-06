@@ -4,8 +4,12 @@
  *
  * This is shell code for the game to be implemented in Lab 4.  It provides basic functions that may prove useful in accomplishing the lab.
  */
+#include "msp430-rng/rand.h"
+#include "buttons/button.h"
 
-
+/* LCG constants */
+#define M 49381                               // Multiplier
+#define I 8643                                // Increment
 #define UP 1
 #define DOWN 2
 #define LEFT 3
@@ -42,10 +46,12 @@ char didPlayerWin(unsigned char player);
 
 unsigned char buttonMove();
 
-/*
- * Functions which may prove useful in achieving A-Functionality.
- *
+
+unsigned int rand();
+unsigned int prand(unsigned int state);
+
+
 char didPlayerHitMine(unsigned char player, unsigned char mines[NUM_MINES]);
 void generateMines(unsigned char mines[NUM_MINES]);
 void printMines(unsigned char mines[NUM_MINES]);
-*/
+
