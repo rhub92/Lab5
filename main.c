@@ -137,8 +137,8 @@ __interrupt void TIMER0_A1_ISR()
     flag += 1;
 	if (flag == 4) {
 		game = 0;
-		mines[0] = mines[0] - 1;
-		mines[1] = mines[1] - 1;
+		//mines[0] = mines[0] - 1;
+		//mines[1] = mines[1] - 1;
 	}
 }
 #pragma vector = PORT2_VECTOR

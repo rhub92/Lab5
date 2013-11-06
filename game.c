@@ -72,25 +72,27 @@ unsigned char buttonMove() {
 
 	char button;
 
-	while ((BIT1 & P1IN) && (BIT2 & P1IN) && (BIT3 & P1IN) && (BIT4 & P1IN)) {
-	//if(isP1ButtonPressed(BIT1)) {
-	if (BIT1 & ~P1IN) {
-			button = RIGHT;
+	//while ((BIT1 & P1IN) && (BIT2 & P1IN) && (BIT3 & P1IN) && (BIT4 & P1IN)) {
+	if (isP1ButtonPressed(BIT1)) {
+		//if (BIT1 & ~P1IN) {
+		waitForP1ButtonRelease(BIT1);
+		button = RIGHT;
 	}
 
-	//if(isP1ButtonPressed(BIT2)){
-		if (BIT2 & ~P1IN) {
-			button = LEFT;
+	else if (isP1ButtonPressed(BIT2)) {
+		waitForP1ButtonRelease(BIT2);
+		//if (BIT2 & ~P1IN) {
+		button = LEFT;
+	} else if (isP1ButtonPressed(BIT3)) {
+		//if (BIT3 & ~P1IN) {
+		waitForP1ButtonRelease(BIT3);
+		button = UP;
+	} else if (isP1ButtonPressed(BIT4)) {
+		//if (BIT4 & ~P1IN) {
+		waitForP1ButtonRelease(BIT4);
+		button = DOWN;
 	}
-	//if(isP1ButtonPressed(BIT3)){
-		if (BIT3 & ~P1IN) {
-			button = UP;
-	}
-	//if(isP1ButtonPressed(BIT4)) {
-		if (BIT4 & ~P1IN) {
-			button = DOWN;
-	}
-	}
+	//}
 
 
 	return button;
