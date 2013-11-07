@@ -94,6 +94,7 @@ void main(void) {
 			//player = initPlayer();
 			TACTL |= TACLR;
 			flag = 0;
+			game = 1;
 		}
 	}
 }
@@ -145,15 +146,9 @@ void testAndRespondToButtonPush(char buttonToTest)
 #pragma vector=TIMER0_A1_VECTOR
 __interrupt void TIMER0_A1_ISR()
 {
-    if(flag < 4){
+
 	TACTL &= ~TAIFG;            // clear interrupt flag
     flag += 1;
-	clearPlayer(mines[0]);
-	clearPlayer(mines[1]);
-    mines[0] = mines[0] - 1;
-	mines[1] = mines[1] - 1;
-	printMines(mines);
-    }
 	if (flag == 4) {
 		game = 0;
 	}
