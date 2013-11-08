@@ -6,16 +6,22 @@
  */
 #include "msp430-rng/rand.h"
 #include "buttons/button.h"
+#include "lcd.h"
+#include <msp430g2553.h>
 
 /* LCG constants */
 #define M 49381                               // Multiplier
 #define I 8643                                // Increment
+#define RIGHT BIT1
+#define LEFT BIT2
 #define UP BIT3
 #define DOWN BIT4
-#define LEFT BIT2
-#define RIGHT BIT1
-
 #define ROW_MASK 0x40
+#define playerWon 0xc7
+#define firstSpaceTopLine 0x80
+#define firstSpaceBottomLine 0xc0
+#define upperRightCorner 0x87
+#define differenceBetweenLines 0x40
 
 #define NUM_MINES 2
 
@@ -44,14 +50,26 @@ unsigned char movePlayer(unsigned char player, unsigned char direction);
 //
 char didPlayerWin(unsigned char player);
 
+//Returns the button that the user pressed
+
 unsigned char buttonMove();
 
+//Function to return a pseudo random number
 
-unsigned int rand();
 unsigned int prand(unsigned int state);
 
+//Generates random mines to be placed on the LCD screen
 
-char didPlayerHitMine(unsigned char player, unsigned char mines[NUM_MINES]);
 void generateMines(unsigned char mines[NUM_MINES]);
+
+//Prints the random mines on the LCD screen
+
 void printMines(unsigned char mines[NUM_MINES]);
 
+//Initializes the buttons on the geek box
+
+void initButtons();
+
+//Intializes the timer for the game
+
+void timer();

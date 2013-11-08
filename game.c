@@ -1,60 +1,90 @@
-#include <msp430g2553.h>
 #include "game.h"
-#include "lcd.h"
 
+/*
+ * Subroutine Name: initPlayer
+ * Author: Capt Branchflower
+ * Function: Sets the initial position for the player when the game starts or is reset
+ * Inputs: none
+ * Outputs: returns an unsigned char of the value of 0x80
+ * Subroutines used: none
+ */
 
-unsigned char initPlayer()
-{
-	return 0x80;
+unsigned char initPlayer() {
+	return firstSpaceTopLine;
 }
 
-void printPlayer(unsigned char player)
-{
+/*
+ * Subroutine Name: printPlayer
+ * Author: Capt Branchflower
+ * Function: Prints the player represented by an asterisk on the LCD screen
+ * Inputs: player- the position of the player
+ * Outputs: none
+ * Subroutines used: writeCommandByte, writeDataByte
+ */
+
+void printPlayer(unsigned char player) {
 	writeCommandByte(player);
 	writeDataByte('*');
 }
 
-void clearPlayer(unsigned char player)
-{
+/*
+ * Subroutine Name: clearPlayer
+ * Author:Capt Branchflower
+ * Function: Clears the player on the LCD screen
+ * Inputs: player- the position of the player
+ * Outputs: none
+ * Subroutines used: writeCommandByte, writeDataByte
+ */
+
+void clearPlayer(unsigned char player) {
 	writeCommandByte(player);
 	writeDataByte(' ');
 }
 
-unsigned char movePlayer(unsigned char player, unsigned char direction)
-{
-	//clearPlayer(player);
+/*
+ * Subroutine Name: movePlayer
+ * Author: Ryan Hub
+ * Function: moves the player on the LCD screen in the direction of up, down, right, or left
+ * Inputs: player- the position of the player
+ * 		   direction- the direction that the player is about to move in
+ * Outputs: returns player- the new position of the player
+ * Subroutines used: none
+ */
+
+unsigned char movePlayer(unsigned char player, unsigned char direction) {
 	switch (direction) {
+
 	case RIGHT:
-		if (player == 0x87) {
-			player = 0xc0;
+		if (player == upperRightCorner) {
+			player = firstSpaceBottomLine;
 		} else {
-		player = player + 1;
+			player = player + 1;
 		}
 		break;
 
 	case LEFT:
-		if (player == 0x80) {
+		if (player == firstSpaceTopLine) {
 			player = player;
-		} else if (player == 0xc0) {
-			player = 0x87;
+		} else if (player == firstSpaceBottomLine) {
+			player = upperRightCorner;
 		} else {
-		player = player - 1;
+			player = player - 1;
 		}
 		break;
 
 	case UP:
-		if (player <= 0x87) {
+		if (player <= upperRightCorner) {
 			player = player;
 		} else {
-			player = player - 0x40;
+			player = player - differenceBetweenLines;
 		}
 		break;
 
 	case DOWN:
-		if(player >= 0xc0) {
+		if (player >= firstSpaceBottomLine) {
 			player = player;
 		} else {
-			player = player + 0x40;
+			player = player + differenceBetweenLines;
 		}
 		break;
 	}
@@ -62,55 +92,46 @@ unsigned char movePlayer(unsigned char player, unsigned char direction)
 	return player;
 }
 
-//unsigned char didPlayerWin(unsigned char player)
-//{
-	//return player == 0xC7;
-//}
+/*
+ * Subroutine Name: buttonMove
+ * Author: Ryan Hub
+ * Function: checks to see which button is pressed and returns that button
+ * Inputs: none
+ * Outputs: returns button- the button that the user pressed
+ * Subroutines used: isP1ButtonPressed, waitforP1ButtonRelease
+ */
 
 unsigned char buttonMove() {
 
 	char button = 0;
 
-	//while ((BIT1 & P1IN) && (BIT2 & P1IN) && (BIT3 & P1IN) && (BIT4 & P1IN)) {
 	if (isP1ButtonPressed(BIT1)) {
-		//if (BIT1 & ~P1IN) {
 		waitForP1ButtonRelease(BIT1);
 		button = RIGHT;
-	}
-
-	else if (isP1ButtonPressed(BIT2)) {
+	} else if (isP1ButtonPressed(BIT2)) {
 		waitForP1ButtonRelease(BIT2);
-		//if (BIT2 & ~P1IN) {
 		button = LEFT;
 	} else if (isP1ButtonPressed(BIT3)) {
-		//if (BIT3 & ~P1IN) {
 		waitForP1ButtonRelease(BIT3);
 		button = UP;
 	} else if (isP1ButtonPressed(BIT4)) {
-		//if (BIT4 & ~P1IN) {
 		waitForP1ButtonRelease(BIT4);
 		button = DOWN;
 	}
-	//}
 
 	return button;
 }
 
 
-void generateMines(unsigned char mines[NUM_MINES]) {
-	int seed = rand();
-	mines[0] = 0x80;
-	mines[1] = 0xc0;
 
-	while(mines[1] - mines[0] == 0x40 || mines[1] - mines[0] == 0x41 || mines[1] - mines[0] == 0x39){
-		int random = prand(seed);
-		int random1 = prand(random);
-		mines[0] = 0x81 + random%7;
-		mines[1] = 0xc0 + random1%7;
-		printMines(mines);
-	}
-
-}
+/*
+ * Subroutine Name: printMines
+ * Author: Ryan Hub
+ * Function: prints the mines to the LCD screen
+ * Inputs: mines[]- an array thats size is based on the number of mines
+ * Outputs: none
+ * Subroutines used: writeCommandByte, writeDataByte
+ */
 
 void printMines(unsigned char mines[NUM_MINES]) {
 	writeCommandByte(mines[0]);
@@ -118,3 +139,48 @@ void printMines(unsigned char mines[NUM_MINES]) {
 	writeCommandByte(mines[1]);
 	writeDataByte('x');
 }
+
+
+/*
+ * Subroutine Name: initButtons
+ * Author: Ryan Hub
+ * Function:intializes the buttons on the geek box
+ * Inputs: none
+ * Outputs: none
+ * Subroutines used: configureP1PinAsButton
+ */
+
+void initButtons() {
+	configureP1PinAsButton(BIT1 | BIT2 | BIT3 | BIT4);
+	P1IES |= BIT1 | BIT2 | BIT3 | BIT4;
+	P1IFG &= ~(BIT1 | BIT2 | BIT3 | BIT4);
+	P1IE |= BIT1 | BIT2 | BIT3 | BIT4;
+}
+
+/*
+ * Subroutine Name: timer
+ * Author: Ryan Hub
+ * Function:intializes the timer for the game
+ * Inputs: none
+ * Outputs: none
+ * Subroutines used: none
+ */
+
+void timer() {
+	TACTL &= ~(MC1 | MC0);        // stop timer
+
+	TACTL |= TACLR;             // clear TAR
+
+	TACTL |= TASSEL1;   // configure for SMCLK - what's the frequency (roughly)?
+
+	TACTL |= ID1 | ID0; // divide clock by 8 - what's the frequency of interrupt?
+
+	TACTL &= ~TAIFG;            // clear interrupt flag
+
+	TACTL |= MC1;               // set count mode to continuous
+
+	TACTL |= TAIE;              // enable interrupt
+
+}
+
+
